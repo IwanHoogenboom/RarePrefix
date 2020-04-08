@@ -5,3 +5,4 @@
 # Project Specifc
 data/*
 *.txt
+.idea
