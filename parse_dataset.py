@@ -35,7 +35,7 @@ c_df = c_df.drop_duplicates(subset='Query', keep='first')
 print(c_df.info())
 
 ##generate datasets
-background = c_df[(c_df['QueryTime'] >= '2006-03-01') & (c_df['QueryTime'] < '2006-05-01')]
+background = c_df[(c_df['QueryTime'] >= '2006-03-01') & (c_df['QueryTime'] <= '2006-04-30')]
 train = c_df[(c_df['QueryTime'] >= '2006-05-01') & (c_df['QueryTime'] < '2006-05-15')]
 validation = c_df[(c_df['QueryTime'] >= '2006-05-15') & (c_df['QueryTime'] < '2006-05-22')]
 test = c_df[(c_df['QueryTime'] >= '2006-05-22') & (c_df['QueryTime'] < '2006-05-29')]
@@ -45,6 +45,11 @@ background = background.drop(columns=['QueryTime'])
 train = train.drop(columns=['QueryTime'])
 val = validation.drop(columns=['QueryTime'])
 test = test.drop(columns=['QueryTime'])
+
+print(background.info())
+print(train.info())
+print(val.info())
+print(test.info())
 
 #write the datasets
 background.to_csv('background.txt', sep='\t', index=False)
