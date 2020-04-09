@@ -8,16 +8,20 @@ import pandas as pd
 import glob
 import os
 import string
+import re
 
 
 def normalize(x):
-    return str(x).lower().translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    return str(x).lower().translate(str.maketrans('', '', string.punctuation))
 
 def one_word(x):
     if len(str(x).split()) == 1 and not str(x).endswith(' '):
         return ""
     else:
         return str(x)
+
+def remove_extra_whitespace(x):
+    return re.sub(' +', ' ', str(x))
 
 #Folder with 10 datafiles, MAKE SURE THE README IS NOT IN THIS FOLDER ANYMORE.
 path = './data/'
@@ -35,6 +39,10 @@ c_df['Query'] = c_df['Query'].apply(normalize)
 # Remove single (non-finished) words.
 c_df['Query'] = c_df['Query'].apply(one_word)
 
+# Remove extra whitespaces.
+c_df['Query'] = c_df['Query'].apply(remove_extra_whitespace)
+
+
 # Drop all empty values or whitespaces.
 c_df = c_df[c_df["Query"] != ""]
 c_df = c_df[c_df["Query"] != " "]
@@ -44,7 +52,7 @@ print(c_df.info())
 
 ##generate datasets
 # PRINT OOK EVEN QUERY TIME
-background = c_df[(c_df['QueryTime'] >= '2006-03-01') & (c_df['QueryTime'] <= '2006-04-30')]
+background = c_df[(c_df['QueryTime'] >= '2006-04-01') & (c_df['QueryTime'] <= '2006-04-30')]
 train = c_df[(c_df['QueryTime'] >= '2006-05-01') & (c_df['QueryTime'] < '2006-05-15')]
 validation = c_df[(c_df['QueryTime'] >= '2006-05-15') & (c_df['QueryTime'] < '2006-05-22')]
 test = c_df[(c_df['QueryTime'] >= '2006-05-22') & (c_df['QueryTime'] < '2006-05-29')]

@@ -1,5 +1,8 @@
 from enum import IntEnum
 import os.path
+from collections import Counter
+from background_processing import get_background_popularity
+from background_processing import get_background_popularity_tree
 
 
 class CandidateScenario (IntEnum):
@@ -40,24 +43,57 @@ def load_dataset(set: DataSet):
 
 
 def most_popular_completion(scenario: CandidateScenario, dataset: DataSet):
-    background_data = load_dataset(DataSet.BACKGROUND)
     data = load_dataset(dataset)
     print(f"Size of set is {len(data)}.")
 
+    background_popularity = get_background_popularity()
+    background_popularity_tree = get_background_popularity_tree(background_popularity)
+    mrr = 0
+    count = 0
+    j = 0
     for query in data:
-        q = ""
-        for char in query:
-            # Skip whitespace
+        j += 1
+        if j % 100 == 0:
+            prog = "{:.2f}".format(j / len(data) * 100)
+            print(f"Building popularity counter: {prog}%")
+
+        query_split = query.split(" ", 2)
+        q = query_split[0]
+
+        count += 1
+        mrr += computeReciprocalRank(query, get_full_query_candidates(background_popularity_tree, q))
+
+        if len(query_split) <= 1:
+            continue
+
+        for char in " " + query[2]:
+            # Skip whitespace.
             if char == " ":
                 q += char
                 continue
             q += char
-            print(q)
+            count += 1
+            print(mrr)
+            mrr += computeReciprocalRank(query, get_full_query_candidates(background_popularity_tree, q))
+    print(f"MRR: {count/mrr}")
 
-def get_full_candidates(background_data, prefix, stop = 10):
-    candidates = []
-    
+
+def computeReciprocalRank(query, candidates):
+    i = 0
+    for candidate, count in candidates:
+        print(candidate)
+        print(query)
+        if query == candidate:
+            return 1.0 / (i + 1)
+        i += 1
+    return 0
+
+
+def get_full_query_candidates(background_popularity, prefix, max = 10):
+    return Counter(background_popularity.items(prefix)).most_common(max)
+
 
 
 
 most_popular_completion(CandidateScenario.NO_SUFFIXES, DataSet.TEST)
+

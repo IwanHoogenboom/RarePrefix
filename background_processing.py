@@ -1,6 +1,9 @@
 import os.path
 from collections import Counter
 import pickle
+import pygtrie as trie
+import datrie
+import string
 
 # Computes end-grams of the background data.
 def get_background_endgrams(directory = ""):
@@ -19,7 +22,7 @@ def get_background_endgrams(directory = ""):
 
     # Load data
     f = open(background_data_file, 'r')
-    background_data = f.readlines()
+    background_data = f.read().splitlines()
     f.close()
 
     # Compute n-grams of background_data.
@@ -54,7 +57,7 @@ def get_background_popularity(directory = ""):
 
     # Load data
     f = open(background_data_file, 'r')
-    background_data = f.readlines()
+    background_data = f.read().splitlines()
     f.close()
 
     # Compute n-grams of background_data.
@@ -64,18 +67,41 @@ def get_background_popularity(directory = ""):
         j += 1
         if j % 100000 == 0:
             prog = "{:.2f}".format(j / len(background_data) * 100)
-            print(f"{prog}%")
-        counter.update(query)
+            print(f"Building popularity counter: {prog}%")
+        counter.update({query})
 
     with open(background_popularity_file, 'wb') as outputfile:
         pickle.dump(counter, outputfile)
 
     return counter
 
+def get_background_popularity_tree(counter):
+    popularity_tree_file = "background_popularity_tree.txt"
+
+    # Get tree if already computed.
+    if os.path.isfile(popularity_tree_file):
+        print("Popular queries prefix tree was already computed, now load the file.")
+        return datrie.Trie.load(popularity_tree_file)
+
+    tree = datrie.Trie(string.ascii_lowercase + string.whitespace + string.digits)
+
+    j = 0
+    counter_common = counter.most_common()
+    for el, count in counter_common:
+        j += 1
+        if j % 100000 == 0:
+            prog = "{:.2f}".format(j / len(counter_common) * 100)
+            print(f"Build prefix-tree: {prog}%")
+        tree[el] = count
+
+
+    # Store tree.
+    tree.save(popularity_tree_file)
+
+    return tree
+
 
 # For a query computes all end-grams.
 def compute_end_grams(query):
     query_split = query.split()
     return {' '.join(query_split[-i:]) for i in range(1, len(query_split) + 1)}
-
-
