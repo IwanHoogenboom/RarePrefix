@@ -9,8 +9,17 @@ import glob
 import os
 import string
 
+
 def normalize(x):
-    return str(x).lower().translate(str.maketrans('', '', string.punctuation))
+    return str(x).lower().translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+
+def one_word(x):
+    if len(x.split()) == 1 and not x.endswith(' '):
+        return ""
+    else:
+        return x
+
+print(one_word("test "))
 
 #Folder with 10 datafiles, MAKE SURE THE README IS NOT IN THIS FOLDER ANYMORE.
 path = './data/'
@@ -24,17 +33,20 @@ c_df = pd.concat(df_each_dropped, ignore_index=True)
 
 # Normalize all queries by removing punctuation and lowercase.
 c_df['Query'] = c_df['Query'].apply(normalize)
+c_df['Query'] = c_df['Query'].apply(one_word)
 
-# Drop all empty/NA values.
-c_df = c_df.dropna()
+# Drop all empty values or whitespaces.
+c_df = c_df[c_df["Query"] != ""]
+c_df = c_df[c_df["Query"] != " "]
 
-# Get only unique queries.
+# Drop all duplicates.
 c_df = c_df.drop_duplicates(subset='Query', keep='first')
 
 # Print the info.
 print(c_df.info())
 
 ##generate datasets
+# PRINT OOK EVEN QUERY TIME
 background = c_df[(c_df['QueryTime'] >= '2006-03-01') & (c_df['QueryTime'] <= '2006-04-30')]
 train = c_df[(c_df['QueryTime'] >= '2006-05-01') & (c_df['QueryTime'] < '2006-05-15')]
 validation = c_df[(c_df['QueryTime'] >= '2006-05-15') & (c_df['QueryTime'] < '2006-05-22')]
@@ -46,10 +58,14 @@ train = train.drop(columns=['QueryTime'])
 val = validation.drop(columns=['QueryTime'])
 test = test.drop(columns=['QueryTime'])
 
-print(background.info())
-print(train.info())
-print(val.info())
-print(test.info())
+print("BACKGROUND")
+background.info()
+print("TRAIN")
+train.info()
+print("VALIDATION")
+val.info()
+print("TEST")
+test.info()
 
 #write the datasets
 background.to_csv('background.txt', sep='\t', index=False)
