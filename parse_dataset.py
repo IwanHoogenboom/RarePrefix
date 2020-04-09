@@ -14,12 +14,10 @@ def normalize(x):
     return str(x).lower().translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
 
 def one_word(x):
-    if len(x.split()) == 1 and not x.endswith(' '):
+    if len(str(x.split())) == 1 and not str(x).endswith(' '):
         return ""
     else:
-        return x
-
-print(one_word("test "))
+        return str(x)
 
 #Folder with 10 datafiles, MAKE SURE THE README IS NOT IN THIS FOLDER ANYMORE.
 path = './data/'
@@ -32,15 +30,12 @@ df_each_dropped = (df.drop(columns=['AnonID', 'ItemRank', 'ClickURL']) for df in
 c_df = pd.concat(df_each_dropped, ignore_index=True)
 
 # Normalize all queries by removing punctuation and lowercase.
-c_df['Query'] = c_df['Query'].apply(normalize)
 c_df['Query'] = c_df['Query'].apply(one_word)
+c_df['Query'] = c_df['Query'].apply(normalize)
 
 # Drop all empty values or whitespaces.
 c_df = c_df[c_df["Query"] != ""]
 c_df = c_df[c_df["Query"] != " "]
-
-# Drop all duplicates.
-c_df = c_df.drop_duplicates(subset='Query', keep='first')
 
 # Print the info.
 print(c_df.info())
@@ -57,6 +52,12 @@ background = background.drop(columns=['QueryTime'])
 train = train.drop(columns=['QueryTime'])
 val = validation.drop(columns=['QueryTime'])
 test = test.drop(columns=['QueryTime'])
+
+# Drop duplicates.
+background = background.drop_duplicates(subset='Query', keep='first')
+train = train.drop_duplicates(subset='Query', keep='first')
+val = val.drop_duplicates(subset='Query', keep='first')
+test = test.drop_duplicates(subset='Query', keep='first')
 
 print("BACKGROUND")
 background.info()
