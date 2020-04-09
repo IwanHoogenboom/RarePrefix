@@ -12,6 +12,7 @@ class DataSet (IntEnum):
     TRAINING = 1
     TEST = 2
     VALIDATION = 3
+    BACKGROUND = 4
 
 def load_dataset(set: DataSet):
     file_name = ""
@@ -21,6 +22,8 @@ def load_dataset(set: DataSet):
         file_name = "validation.txt"
     elif set is DataSet.TEST:
         file_name =  "test.txt"
+    elif set is DataSet.BACKGROUND:
+        file_name = "background.txt"
     else:
         raise Exception(f"Dataset not found: {set}")
 
@@ -30,14 +33,31 @@ def load_dataset(set: DataSet):
     print(f"Now loading {file_name}")
 
     f = open(file_name, 'r')
-    data = f.readlines()
+    data = f.read().splitlines()
     f.close()
 
     return data[1:]
 
 
-def generate_candidates(scenario: CandidateScenario, dataset: DataSet):
+def most_popular_completion(scenario: CandidateScenario, dataset: DataSet):
+    background_data = load_dataset(DataSet.BACKGROUND)
     data = load_dataset(dataset)
+    print(f"Size of set is {len(data)}.")
+
+    for query in data:
+        q = ""
+        for char in query:
+            # Skip whitespace
+            if char == " ":
+                q += char
+                continue
+            q += char
+            print(q)
+
+def get_full_candidates(background_data, prefix, stop = 10):
+    candidates = []
+    
 
 
-generate_candidates(CandidateScenario.NO_SUFFIXES, DataSet.TEST)
+
+most_popular_completion(CandidateScenario.NO_SUFFIXES, DataSet.TEST)

@@ -1,4 +1,4 @@
-from background_suffixes import get_background_endgrams
+from background_processing import get_background_endgrams
 from collections import Counter
 
 end_grams = get_background_endgrams(directory="../")
