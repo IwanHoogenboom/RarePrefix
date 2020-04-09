@@ -1,59 +1,46 @@
 import os.path
-from nltk import ngrams
 from collections import Counter
-from functools import reduce
-import pickle
 import pickle
 
-lengt = 0
-def get_background_data(top = -1):
-    global lengt
-    background_data_file = "background.txt"
+# Computes end-grams of the background data.
+def get_background_endgrams(directory = ""):
+    background_data_file = directory + "background.txt"
+    background_ngrams_file = directory + "background_ngrams.txt"
 
     if not os.path.isfile(background_data_file):
         raise Exception("Background data is not available. Please run the `parse_dataset.py` script.")
 
-    # load data
+    # Get counter if already computed.
+    if os.path.isfile(background_ngrams_file):
+        print("N-grams were already computed, now loading the file.")
+        return pickle.load(open(background_ngrams_file, 'rb'))
+
+    print("Generating n-grams and storing to file.")
+
+    # Load data
     f = open(background_data_file, 'r')
     background_data = f.readlines()
     f.close()
 
-    lengt = len(background_data)
-    print(lengt)
+    # Compute n-grams of background_data.
+    counter = Counter()
+    j = 0
+    for query in background_data:
+        j += 1
+        if j % 100000 == 0:
+            prog = "{:.2f}".format(j / len(background_data) * 100)
+            print(f"{prog}%")
+        counter.update(compute_end_grams(query))
 
-    ngrams_file = "background_ngrams.txt"
-    if os.path.isfile(ngrams_file):
-        print("N-grams were already generated, now loading them.")
-        # load here and return
+    with open(background_ngrams_file, 'wb') as outputfile:
+        pickle.dump(counter, outputfile)
 
-    counter = reduce((lambda x, y: x + y), map(lambda q: compute_end_grams(q), background_data))
+    return counter
 
-    f = open(ngrams_file)
-    pickle.dump(counter, f)
-    if top is -1:
-        return counter
-    else:
-        return counter.most_common(top)
-
-j = 0
 
 # For a query computes all end-grams.
 def compute_end_grams(query):
-    global j
-    global lengt
-    j += 1
-    if j % 10000 is 0:
-        print((j / lengt) * 100)
     query_split = query.split()
-    all_ngrams = []
-    for i in range(1, len(query_split) + 1):
-        all_ngrams.append(' '.join(query_split[-i:]))
+    return {' '.join(query_split[-i:]) for i in range(1, len(query_split) + 1)}
 
-    return Counter(all_ngrams)
-
-
-
-
-get_background_data(10)
-print(compute_end_grams("bank of america"))
 
