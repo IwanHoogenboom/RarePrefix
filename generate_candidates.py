@@ -2,7 +2,7 @@ from enum import IntEnum
 import os.path
 from collections import Counter
 from background_processing import get_background_popularity
-from background_processing import get_background_popularity_tree
+from background_processing import get_prefix_tree
 
 
 class CandidateScenario (IntEnum):
@@ -47,15 +47,16 @@ def most_popular_completion(scenario: CandidateScenario, dataset: DataSet):
     print(f"Size of set is {len(data)}.")
 
     background_popularity = get_background_popularity()
-    background_popularity_tree = get_background_popularity_tree(background_popularity)
+    background_popularity_tree = get_prefix_tree(background_popularity, "background_popularity_tree.txt")
     mrr = 0
     count = 0
     j = 0
     for query in data:
         j += 1
-        if j % 100 == 0:
+        if j % 1000 == 0:
             prog = "{:.2f}".format(j / len(data) * 100)
-            print(f"Building popularity counter: {prog}%")
+            print(mrr / count)
+            print(f"Evaluating MostPopularCompletion: {prog}%")
 
         query_split = query.split(" ", 2)
         q = query_split[0]
@@ -66,23 +67,20 @@ def most_popular_completion(scenario: CandidateScenario, dataset: DataSet):
         if len(query_split) <= 1:
             continue
 
-        for char in " " + query[2]:
+        for char in " " + query_split[1]:
             # Skip whitespace.
             if char == " ":
                 q += char
                 continue
             q += char
             count += 1
-            print(mrr)
             mrr += computeReciprocalRank(query, get_full_query_candidates(background_popularity_tree, q))
-    print(f"MRR: {count/mrr}")
+    print(f"MRR: {mrr/count}")
 
 
 def computeReciprocalRank(query, candidates):
     i = 0
     for candidate, count in candidates:
-        print(candidate)
-        print(query)
         if query == candidate:
             return 1.0 / (i + 1)
         i += 1
@@ -90,10 +88,10 @@ def computeReciprocalRank(query, candidates):
 
 
 def get_full_query_candidates(background_popularity, prefix, max = 10):
-    return Counter(background_popularity.items(prefix)).most_common(max)
+    return Counter(dict(background_popularity.items(prefix))).most_common(max)
 
 
 
 
-most_popular_completion(CandidateScenario.NO_SUFFIXES, DataSet.TEST)
+most_popular_completion(CandidateScenario.NO_SUFFIXES, DataSet.BACKGROUND)
 

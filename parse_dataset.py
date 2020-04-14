@@ -12,7 +12,7 @@ import re
 
 
 def normalize(x):
-    return str(x).lower().translate(str.maketrans('', '', string.punctuation))
+    return str(x).lower().translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
 
 def one_word(x):
     if len(str(x).split()) == 1 and not str(x).endswith(' '):
@@ -52,7 +52,7 @@ print(c_df.info())
 
 ##generate datasets
 # PRINT OOK EVEN QUERY TIME
-background = c_df[(c_df['QueryTime'] >= '2006-04-01') & (c_df['QueryTime'] <= '2006-04-30')]
+background = c_df[(c_df['QueryTime'] >= '2006-03-01') & (c_df['QueryTime'] <= '2006-04-30')]
 train = c_df[(c_df['QueryTime'] >= '2006-05-01') & (c_df['QueryTime'] < '2006-05-15')]
 validation = c_df[(c_df['QueryTime'] >= '2006-05-15') & (c_df['QueryTime'] < '2006-05-22')]
 test = c_df[(c_df['QueryTime'] >= '2006-05-22') & (c_df['QueryTime'] < '2006-05-29')]
@@ -63,11 +63,10 @@ train = train.drop(columns=['QueryTime'])
 val = validation.drop(columns=['QueryTime'])
 test = test.drop(columns=['QueryTime'])
 
-# Drop duplicates.
-# background = background.drop_duplicates(subset='Query', keep='first')
-# train = train.drop_duplicates(subset='Query', keep='first')
-# val = val.drop_duplicates(subset='Query', keep='first')
-# test = test.drop_duplicates(subset='Query', keep='first')
+# Drop duplicates for train, val and test set.
+train = train.drop_duplicates(subset='Query', keep='first')
+val = val.drop_duplicates(subset='Query', keep='first')
+test = test.drop_duplicates(subset='Query', keep='first')
 
 print("BACKGROUND")
 background.info()

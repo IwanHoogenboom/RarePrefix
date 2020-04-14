@@ -6,3 +6,6 @@
 data/*
 *.txt
 .idea
+
+project/
+.DS_Store

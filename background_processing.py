@@ -75,13 +75,12 @@ def get_background_popularity(directory = ""):
 
     return counter
 
-def get_background_popularity_tree(counter):
-    popularity_tree_file = "background_popularity_tree.txt"
+def get_prefix_tree(counter, filename):
 
     # Get tree if already computed.
-    if os.path.isfile(popularity_tree_file):
-        print("Popular queries prefix tree was already computed, now load the file.")
-        return datrie.Trie.load(popularity_tree_file)
+    if os.path.isfile(filename):
+        print(f"{filename} was already computed, now load the file.")
+        return datrie.Trie.load(filename)
 
     tree = datrie.Trie(string.ascii_lowercase + string.whitespace + string.digits)
 
@@ -96,10 +95,9 @@ def get_background_popularity_tree(counter):
 
 
     # Store tree.
-    tree.save(popularity_tree_file)
+    tree.save(filename)
 
     return tree
-
 
 # For a query computes all end-grams.
 def compute_end_grams(query):
