@@ -5,13 +5,19 @@ import scala.io.Source
 class FeatureGenerator(filename: String) {
 
   private val writeFilename = filename.replace(".txt", "_features.txt")
-  private val writeGroupname = filename.replace(".txt", "_groups.txt")
+  private val writeGroupname = filename.replace(".txt", "_features.txt.group")
 
   def generateAndWriteFeatures(): Unit = {
     val featureFile = new File(writeFilename)
     val groupFile = new File(writeGroupname)
 
-    if (!featureFile.exists()) featureFile.createNewFile()
+    println("Now generating features.")
+    if (!featureFile.exists()) {
+      featureFile.createNewFile()
+    } else {
+      println(s"Features already exist for ${featureFile.getName}.")
+      return
+    }
     if (!groupFile.exists()) groupFile.createNewFile()
 
     var i = 0

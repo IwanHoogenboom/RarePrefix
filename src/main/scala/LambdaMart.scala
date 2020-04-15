@@ -3,6 +3,7 @@ import java.io.File
 import ml.dmlc.xgboost4j.scala.{DMatrix, XGBoost}
 
 import scala.collection.mutable
+import scala.io.Source
 
 object LambdaMart {
 
@@ -13,7 +14,6 @@ object LambdaMart {
     val validateM = new DMatrix(validationFile)
 
     val watches = new mutable.HashMap[String, DMatrix]
-    watches += "train" -> trainM
     watches += "validation" -> validateM
 
     val params = new mutable.HashMap[String, Any]()
@@ -26,6 +26,7 @@ object LambdaMart {
 
     val round = 4
     // train a model
+    println("Now training the model!")
     val booster = XGBoost.train(trainM, params.toMap, round, watches.toMap)
 
     // predict
@@ -34,11 +35,8 @@ object LambdaMart {
     if (!file.exists()) {
       file.mkdirs()
     }
-    booster.saveModel(file.getAbsolutePath + "/xgb.model")
-    // dump model with feature map
-    val modelInfos =
-      booster.getModelDump(file.getAbsolutePath + "/featmap.txt", false)
 
+    booster.saveModel(file.getAbsolutePath + s"/$modelName")
   }
 
   def evaluateModel(pathModel: String, pathTest: String) = {

@@ -47,14 +47,20 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
     : mutable.LinkedHashMap[String, List[String]] =
     mutable.LinkedHashMap.empty
 
-  def generateCandidates(synthetic: Int = 0) = {
+  def generateCandidates(synthetic: Int = 0): Unit = {
     candidateHash.clear()
     synthethicCandidateHash.clear()
 
-    println("Now generating candidates: ")
+    println(s"Now generating candidates for ${dataset.filename}, synthetic: $synthetic: ")
     val candidateFile = new File(
       candidate_file.replace(".txt", s"_${synthetic}.txt"))
-    if (!candidateFile.exists()) candidateFile.createNewFile()
+    if (!candidateFile.exists()) {
+      candidateFile.createNewFile()
+    }
+    else {
+      println(s"Candidates already exists in ${candidateFile.getName}. Exiting.")
+      return
+    }
 
     val bufferedWriter: BufferedWriter = new BufferedWriter(
       new FileWriter(candidateFile))

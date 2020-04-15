@@ -62,6 +62,8 @@ object Feature {
       currentGroupId += 1
       currentGroupSize = 0
     }
+
+    currentGroupSize += 1
     val builder = new StringBuilder()
     builder.append(feature.relevant + " ")
     builder.append(s"qid:${currentGroupId} ")
