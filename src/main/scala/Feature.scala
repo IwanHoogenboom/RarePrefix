@@ -1,3 +1,5 @@
+import java.io.BufferedWriter
+
 case class FeatureVec(freq: Int,
                       prefix: String,
                       lenPrefix: Int,
@@ -19,6 +21,8 @@ object Feature {
   private lazy val background = new BackgroundData()
   private var currentGroup = ""
   private var currentGroupId = 0
+  private var currentGroupSize = 0
+  var groupWriter: BufferedWriter = null
 
   def computeFeatureVec(candidate: Candidate): FeatureVec = {
     val freq =
@@ -51,8 +55,12 @@ object Feature {
 
   def writeFeature(feature: FeatureVec): String = {
     if (currentGroup != feature.prefix) {
+      if (currentGroupSize != 0) {
+        groupWriter.write(s"$currentGroupSize\n")
+      }
       currentGroup = feature.prefix
       currentGroupId += 1
+      currentGroupSize = 0
     }
     val builder = new StringBuilder()
     builder.append(feature.relevant + " ")

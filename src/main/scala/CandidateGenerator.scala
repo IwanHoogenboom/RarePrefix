@@ -48,6 +48,9 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
     mutable.LinkedHashMap.empty
 
   def generateCandidates(synthetic: Int = 0) = {
+    candidateHash.clear()
+    synthethicCandidateHash.clear()
+
     println("Now generating candidates: ")
     val candidateFile = new File(
       candidate_file.replace(".txt", s"_${synthetic}.txt"))
@@ -115,7 +118,6 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
 
     }
 
-    println(MRR.result())
     bufferedWriter.close()
   }
 

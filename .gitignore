@@ -9,3 +9,4 @@ data/*
 
 project/
 .DS_Store
+target/
