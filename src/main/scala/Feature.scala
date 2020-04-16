@@ -30,6 +30,8 @@ object Feature {
         background.countHashMap(candidate.full)
       else 0
 
+    val ngramfeature = nGramFeature(candidate.full)
+
     val prefixLen = candidate.prefix.length
     val lenWordsPrefix = candidate.prefix.split(" ").length
 
@@ -91,4 +93,15 @@ object Feature {
 
   def candidate2FeatureVec(candidate: String) =
     writeFeature(computeFeatureVec(parseCandidate(candidate)))
+
+  def nGramFeature(candidate: String): Array[Int] ={
+    val ngrams = background.getNGrams(candidate)
+    val feature = Array(0, 0, 0, 0, 0, 0)
+    ngrams.foreach(g => {
+      var count = background.ngramCountHashMap(g)
+      val n = g.split(" ").length
+      feature(n - 1) += count
+    })
+    feature
+  }
 }

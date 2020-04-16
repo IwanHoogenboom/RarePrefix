@@ -13,6 +13,7 @@ class BackgroundData() {
   private val background_count_map = "background_count.txt"
   private val background_ngram_map = "background_ngram_map.txt"
   lazy val countHashMap: Map[String, Int] = this.getCountMap().toMap
+  lazy val ngramCountHashMap: Map[String, Int] = this.getNgramsMap().toMap
 
   def getCountMap(): Iterator[(String, Int)] = {
     if (!new File(background_count_map).exists()) {
@@ -123,7 +124,7 @@ class BackgroundData() {
   def getNGrams(query: String): List[String] = {
     val split = query.split(" ")
     var NgramList = List[String]()
-    for ( n <- 2 to 4) {
+    for ( n <- 1 to 6) {
       split.sliding(n).foreach( p => {
         val str = p.mkString(" ")
         NgramList = str :: NgramList

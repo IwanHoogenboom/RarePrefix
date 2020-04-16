@@ -51,8 +51,4 @@ class FeatureGenerator(filename: String) {
   def candidates = Source.fromFile(filename).getLines.drop(0)
 
 
-  def generateNgramFeatures(): Unit ={
-//TODO
-  }
-
 }

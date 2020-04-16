@@ -1,3 +1,4 @@
+import Feature.background
 import com.rklaehn.radixtree._
 import cats.implicits._
 object Main {
@@ -24,8 +25,25 @@ object Main {
 
 //    LambdaMart.evaluateModel("./model/xgb.model",
 //                             "test_candidates_0_features.txt")
-    val bgd = new BackgroundData();
-    bgd.getNgramsMap()
+//    val bgd = new BackgroundData()
+
+//    val ngrams = bgd.getNgramsMap().toMap
+    //    ngrams.foreach(p => println(p))
+//    print(tree.contains("facebook"))
+//    val ngrams = bgd.getNGrams("dog eats from litter box and gets sick")
+//    println(ngrams)
+//    val feature = Array(0, 0, 0, 0, 0, 0)
+//    println(feature.deep.mkString("\n"))
+//
+//    ngrams.foreach(g => {
+//      var count = 0
+//      if (bgd.ngramCountHashMap.contains(g))
+//        count = bgd.ngramCountHashMap(g)
+//      val n = g.split(" ").length
+//      feature(n - 1) += count
+//    })
+//
+//    println(feature.deep.mkString("\n"))
   }
 
   def genAllCandidates(file: String): Unit = {
