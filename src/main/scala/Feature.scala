@@ -1,6 +1,7 @@
 import java.io.BufferedWriter
 
 case class FeatureVec(freq: Int,
+                      group: String,
                       prefix: String,
                       lenPrefix: Int,
                       lenWordsPrefix: Int,
@@ -11,7 +12,9 @@ case class FeatureVec(freq: Int,
                       endsWithSpace: Int,
                       relevant: Int)
 
-case class Candidate(prefix: String,
+case class Candidate(synthetic: String,
+                     group: String,
+                     prefix: String,
                      suffix: String,
                      full: String,
                      relevant: Int)
@@ -21,8 +24,6 @@ object Feature {
   private lazy val background = new BackgroundData()
   private var currentGroup = ""
   private var currentGroupId = 0
-  private var currentGroupSize = 0
-  var groupWriter: BufferedWriter = null
 
   def computeFeatureVec(candidate: Candidate): FeatureVec = {
     val freq =
@@ -42,6 +43,7 @@ object Feature {
     val endsWithSpace = if (candidate.prefix.endsWith(" ")) 1 else 0
 
     FeatureVec(freq,
+               candidate.group,
                candidate.prefix,
                prefixLen,
                lenWordsPrefix,
@@ -54,19 +56,13 @@ object Feature {
   }
 
   def writeFeature(feature: FeatureVec): String = {
-    if (currentGroup != feature.prefix) {
-      if (currentGroupSize != 0) {
-        groupWriter.write(s"$currentGroupSize\n")
-      }
-      currentGroup = feature.prefix
-      currentGroupId += 1
-      currentGroupSize = 0
+    if (currentGroup != feature.group) {
+      currentGroup = feature.group
     }
 
-    currentGroupSize += 1
     val builder = new StringBuilder()
     builder.append(feature.relevant + " ")
-    builder.append(s"qid:${currentGroupId} ")
+    builder.append(s"qid:${feature.group} ")
     builder.append(s"1:${feature.freq} ")
     builder.append(s"2:${feature.lenPrefix} ")
     builder.append(s"3:${feature.lenWordsPrefix} ")
@@ -80,13 +76,15 @@ object Feature {
   }
 
   def parseCandidate(candidate: String): Candidate = {
-    val cSplit = candidate.split("\t")
-    val prefix = cSplit(1)
-    val full = cSplit(2)
+    val cSplit = candidate.split(",")
+    val synthetic = cSplit(0)
+    val group = cSplit(1)
+    val prefix = cSplit(2)
+    val full = cSplit(3)
     val suffix = full.replace(prefix, "")
-    val relevant = cSplit(3).toInt
+    val relevant = cSplit(4).toInt
 
-    Candidate(prefix, suffix, full, relevant)
+    Candidate(synthetic, group, prefix, suffix, full, relevant)
   }
 
   def candidate2FeatureVec(candidate: String) =
