@@ -1,63 +1,49 @@
 import Feature.background
 import com.rklaehn.radixtree._
 import cats.implicits._
+
+import scala.io.Source
 object Main {
 
   def main(args: Array[String]): Unit = {
     // Generate all candidates. Note: this takes quite a while.
-//   genAllCandidates(Dataset.TEST)
-//     genAllCandidates(Dataset.VALIDATION)
-//     genAllCandidates(Dataset.TRAINING)
-
+//    genAllCandidates(Dataset.TEST)
+//    genAllCandidates(Dataset.VALIDATION)
+//    genAllCandidates(Dataset.TRAINING)
 
     // Compute MPC for the test candidates WITHOUT synthetic candidates. We use this as baseline.
 //    val mpc = new MPC("test_candidates_0.txt")
 //    mpc.computeMPC()
 
     // This probably takes a bit of time.
-    // genAllFeatures(Dataset.TEST)
+//    genAllFeatures(Dataset.TEST)
 //    genAllFeatures(Dataset.TRAINING)
 //    genAllFeatures(Dataset.VALIDATION)
+//
+//    val lambda = LambdaMart.trainModel("train_candidates_2_features.txt",
+//                                       "validation_candidates_2_features.txt",
+//                                       "no_ngrams_2_synthetic_correct")
 
-//    val lambda = LambdaMart.trainModel("train_candidates_0_features.txt",
-//                                       "validation_candidates_0_features.txt",
-//                                       "no_ngrams_0_synthetic")
-
-//    LambdaMart.evaluateModel("./model/xgb.model",
+//    LambdaMart.evaluateModel("./model/no_ngrams_2_synthetic_correct",
 //                             "test_candidates_0_features.txt")
-//    val bgd = new BackgroundData()
+    val bgd = new BackgroundData();
+    bgd.getNgramsMap()
 
-//    val ngrams = bgd.getNgramsMap().toMap
-    //    ngrams.foreach(p => println(p))
-//    print(tree.contains("facebook"))
-//    val ngrams = bgd.getNGrams("dog eats from litter box and gets sick")
-//    println(ngrams)
-//    val feature = Array(0, 0, 0, 0, 0, 0)
-//    println(feature.deep.mkString("\n"))
-//
-//    ngrams.foreach(g => {
-//      var count = 0
-//      if (bgd.ngramCountHashMap.contains(g))
-//        count = bgd.ngramCountHashMap(g)
-//      val n = g.split(" ").length
-//      feature(n - 1) += count
-//    })
-//
-//    println(feature.deep.mkString("\n"))
   }
 
   def genAllCandidates(file: String): Unit = {
     val candidateGenerator =
-      new CandidateGenerator(new Dataset(file),
-        new BackgroundData())
+      new CandidateGenerator(new Dataset(file), new BackgroundData())
     candidateGenerator.generateCandidates(Synthetic.NO_SYNTHETIC)
-    candidateGenerator.generateCandidates(Synthetic.SYNTHETIC_10K)
-    candidateGenerator.generateCandidates(Synthetic.SYNTHETIC_100K)
+    //   candidateGenerator.generateCandidates(Synthetic.SYNTHETIC_10K)
+    //candidateGenerator.generateCandidates(Synthetic.SYNTHETIC_100K)
   }
 
   def genAllFeatures(file: String): Unit = {
-    val featureGenerator = new FeatureGenerator(s"${file.replace(".txt", "")}_candidates_0.txt")
+    val featureGenerator = new FeatureGenerator(
+      s"${file.replace(".txt", "")}_candidates_2.txt")
     featureGenerator.generateAndWriteFeatures()
+    featureGenerator.generateGroups()
 
 //    val featureGenerator2 = new FeatureGenerator(s"${file.replace(".txt", "")}_candidates_1.txt")
 //    featureGenerator2.generateAndWriteFeatures()

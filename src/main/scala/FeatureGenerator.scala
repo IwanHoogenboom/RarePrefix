@@ -9,7 +9,6 @@ class FeatureGenerator(filename: String) {
 
   def generateAndWriteFeatures(): Unit = {
     val featureFile = new File(writeFilename)
-    val groupFile = new File(writeGroupname)
 
     println("Now generating features.")
     if (!featureFile.exists()) {
@@ -18,17 +17,12 @@ class FeatureGenerator(filename: String) {
       println(s"Features already exist for ${featureFile.getName}.")
       return
     }
-    if (!groupFile.exists()) groupFile.createNewFile()
 
     var i = 0
     val size = candidates.size
 
     val bufferedWriter: BufferedWriter = new BufferedWriter(
       new FileWriter(writeFilename))
-
-    val groupWriter: BufferedWriter = new BufferedWriter(new FileWriter(writeGroupname))
-
-    Feature.groupWriter = groupWriter
 
     for (rawC <- candidates) {
       i += 1
@@ -40,15 +34,71 @@ class FeatureGenerator(filename: String) {
 
       bufferedWriter.write(Feature.candidate2FeatureVec(rawC))
     }
-
-    groupWriter.flush()
-    groupWriter.close()
     bufferedWriter.flush()
     bufferedWriter.close()
 
   }
 
-  def candidates = Source.fromFile(filename).getLines.drop(0)
+  def generateGroups(): Unit = {
+    val groupFile = new File(writeGroupname)
+
+    if (!groupFile.exists()) {
+      groupFile.createNewFile()
+    } else {
+      println(s"Groups already exist for ${groupFile.getName}.")
+      return
+    }
+
+    val groupWriter: FileWriter = new FileWriter(writeGroupname)
+
+    var i = 0
+    var size = features.size
+
+    var currentGroup = ""
+    var firstEntry = true
+    var firstPrint = true
+    var currentGroupSize = 0
+    for (feat <- features) {
+      i += 1
+      if (i % 100000 == 0) {
+        val progInt = (i / size.toFloat) * 100
+        val prog = f"$progInt%1.2f"
+        println(s"Generating feature groups: $prog%")
+      }
+
+      val group = feat.split(" ")(1)
+
+      if (currentGroup != group && firstEntry) {
+        currentGroup = group
+        currentGroupSize = 0
+        firstEntry = false
+      }
+
+      if (currentGroup != group) {
+        if (firstPrint) {
+          groupWriter.write(currentGroupSize.toString)
+          firstPrint = false
+        } else {
+          groupWriter.write("\n")
+          groupWriter.write(currentGroupSize.toString)
+        }
+        currentGroup = group
+        currentGroupSize = 0
+      }
+
+      currentGroupSize += 1
+    }
+
+    groupWriter.write("\n")
+    groupWriter.write(currentGroupSize.toString)
+
+    groupWriter.flush()
+    groupWriter.close()
+
+  }
+
+  def candidates = Source.fromFile(filename).getLines
+  def features = Source.fromFile(writeFilename).getLines
 
 
 }

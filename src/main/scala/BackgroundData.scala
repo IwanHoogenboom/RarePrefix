@@ -17,12 +17,16 @@ class BackgroundData() {
 
   def getCountMap(): Iterator[(String, Int)] = {
     if (!new File(background_count_map).exists()) {
+      println("Creating count map.")
       createAndStoreCountMap()
     } else {
-      Source.fromFile(background_count_map).getLines().map { x =>
+      println("Loading count map.")
+      val map = Source.fromFile(background_count_map).getLines().map { x =>
         val t = x.split(",")
         (t(0), t(1).toInt)
       }
+      println("Done loading count map.")
+      map
     }
   }
 
@@ -121,6 +125,8 @@ class BackgroundData() {
     endGrams.toList
   }
 
+  def queries = Source.fromFile(background_data).getLines
+
   def getNGrams(query: String): List[String] = {
     val split = query.split(" ")
     var NgramList = List[String]()
@@ -129,9 +135,9 @@ class BackgroundData() {
         val str = p.mkString(" ")
         NgramList = str :: NgramList
       })
+
     }
     NgramList
   }
 
-  def queries = Source.fromFile(background_data).getLines.drop(0)
 }

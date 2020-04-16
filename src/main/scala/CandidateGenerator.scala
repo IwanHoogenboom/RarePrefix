@@ -51,14 +51,15 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
     candidateHash.clear()
     synthethicCandidateHash.clear()
 
-    println(s"Now generating candidates for ${dataset.filename}, synthetic: $synthetic: ")
+    println(
+      s"Now generating candidates for ${dataset.filename}, synthetic: $synthetic: ")
     val candidateFile = new File(
       candidate_file.replace(".txt", s"_${synthetic}.txt"))
     if (!candidateFile.exists()) {
       candidateFile.createNewFile()
-    }
-    else {
-      println(s"Candidates already exists in ${candidateFile.getName}. Exiting.")
+    } else {
+      println(
+        s"Candidates already exists in ${candidateFile.getName}. Exiting.")
       return
     }
 
@@ -67,17 +68,18 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
 
     var i = 0
     val size = dataset.queries.size
+    var groupId = 0
     for (query <- dataset.queries) {
       i += 1
 
       if (i % 10000 == 0) {
         val progInt = (i / size.toFloat) * 100
         val prog = f"$progInt%1.2f"
-        if (candidateHash.size >= 5000000) {
+        if (candidateHash.size >= 4000000) {
           println("Clearing candidate cache.")
           candidateHash.clear()
         }
-        if (synthethicCandidateHash.size >= 5000000) {
+        if (synthethicCandidateHash.size >= 4000000) {
           println("Clearing synthetic candidate cache.")
           synthethicCandidateHash.clear()
         }
@@ -87,56 +89,74 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
       val querySplit = query.split(" ", 2)
       val firstWord: String = querySplit(0)
 
-      val candidates = getCandidates(firstWord)._1.distinct
-
+      val (fCandidatesH, fCandidatesS) = getCandidates(firstWord, synthetic)
       var candidateList: Set[String] = Set()
-      candidates.filter(!candidateList.contains(_)).foreach { c =>
-        writeCandidate(query, firstWord, c, bufferedWriter)
+      fCandidatesH.distinct.filter(!candidateList.contains(_)).foreach { c =>
+        writeCandidate(groupId.toString, query, firstWord, c, bufferedWriter)
+      }
+      candidateList = candidateList.union(fCandidatesH.toSet)
+
+      fCandidatesS.distinct.filter(!candidateList.contains(_)).foreach { c =>
+        writeCandidate(groupId.toString,
+                       query,
+                       firstWord,
+                       c,
+                       bufferedWriter,
+                       true)
       }
 
-      candidateList = candidateList.union(candidates.toSet)
+      candidateList = candidateList.union(fCandidatesH.toSet)
+
+      if (fCandidatesH.size == 0 && fCandidatesS.size == 0) {
+        writeCandidate(groupId.toString,
+                       "no",
+                       "candidates",
+                       "found",
+                       bufferedWriter)
+      }
+      groupId += 1
+
+      candidateList = candidateList.empty
 
       if (querySplit.size > 1) {
         var prefix = firstWord + " "
-        for (c <- querySplit(1)) {
-          prefix += c
+        for (ic <- 0 to (querySplit(1).length - 1)) {
+          val can = querySplit(1)(ic)
+          prefix += can
 
-          if (c != " ") {
+          val (candidatesH, candidatesS) =
+            getCandidates(prefix, 10, synthetic)
 
-            val (candidatesH, candidatesS) =
-              getCandidates(prefix, 10, synthetic)
-
-            candidatesH.filter(!candidateList.contains(_)).foreach { c =>
-              writeCandidate(query, prefix, c, bufferedWriter)
-            }
-
-            candidateList = candidateList.union(candidatesH.toSet)
-
-            candidatesS.filter(!candidateList.contains(_)) foreach { c =>
-              writeCandidate(query, prefix, c, bufferedWriter, true)
-            }
-
-            candidateList = candidateList.empty
+          candidatesH.distinct.filter(!candidateList.contains(_)).foreach { c =>
+            writeCandidate(groupId.toString, query, prefix, c, bufferedWriter)
           }
 
+          candidateList = candidateList.union(candidatesH.toSet)
+
+          candidatesS.distinct.filter(!candidateList.contains(_)) foreach { c =>
+            writeCandidate(groupId.toString,
+                           query,
+                           prefix,
+                           c,
+                           bufferedWriter,
+                           true)
+          }
+
+          if (candidatesH.size == 0 && candidatesS.size == 0) {
+            writeCandidate(groupId.toString,
+                           "no",
+                           "candidates",
+                           "found",
+                           bufferedWriter)
+          }
+
+          groupId += 1
+          candidateList = candidateList.empty
         }
       }
-
     }
 
     bufferedWriter.close()
-  }
-
-  def getSyntheticCandidates10k(prefix: String): List[String] = {
-    val prefixSplit = prefix.split(" ")
-    val endTerm =
-      if (prefix.endsWith(" ")) prefixSplit.last + " " else prefixSplit.last
-
-    radixTree10k
-      .filterPrefix(endTerm)
-      .keys
-      .toList
-      .map(prefixSplit.dropRight(1).mkString(" ") + " " + _)
   }
 
   private def getCandidates(
@@ -194,7 +214,8 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
     candidates
   }
 
-  def writeCandidate(query: String,
+  def writeCandidate(group: String,
+                     query: String,
                      prefix: String,
                      candidate: String,
                      writer: BufferedWriter,
@@ -205,11 +226,13 @@ class CandidateGenerator(dataset: Dataset, backgroundData: BackgroundData) {
       writer.write("S")
     }
 
-    writer.write("\t")
+    writer.write(",")
+    writer.write(group)
+    writer.write(",")
     writer.write(prefix)
-    writer.write("\t")
+    writer.write(",")
     writer.write(candidate)
-    writer.write("\t")
+    writer.write(",")
 
     if (query == candidate) {
       writer.write("1")
