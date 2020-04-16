@@ -18,15 +18,14 @@ object Main {
 //    genAllFeatures(Dataset.TRAINING)
 //    genAllFeatures(Dataset.VALIDATION)
 
-
-
-    val lambda = LambdaMart.trainModel("train_candidates_0_features.txt",
-                                       "validation_candidates_0_features.txt",
-                                       "no_ngrams_0_synthetic")
+//    val lambda = LambdaMart.trainModel("train_candidates_0_features.txt",
+//                                       "validation_candidates_0_features.txt",
+//                                       "no_ngrams_0_synthetic")
 
 //    LambdaMart.evaluateModel("./model/xgb.model",
 //                             "test_candidates_0_features.txt")
-
+    val bgd = new BackgroundData();
+    bgd.getNgramsMap()
   }
 
   def genAllCandidates(file: String): Unit = {
