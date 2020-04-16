@@ -93,9 +93,9 @@ class BackgroundData() {
       if (i % 100000 == 0) {
         println(s"${(i / queries.size.toFloat) * 100}%")
       }
-      val end_grams = getEndGrams(line)
+      val ngrams = getNGrams(line)
 
-      end_grams.foreach {
+      ngrams.foreach {
         countMap(_) += 1
       }
     }
@@ -125,4 +125,18 @@ class BackgroundData() {
   }
 
   def queries = Source.fromFile(background_data).getLines
+  def getNGrams(query: String): List[String] = {
+    val split = query.split(" ")
+    var NgramList = List[String]()
+    for (n <- 2 to 4) {
+      split
+        .sliding(n)
+        .foreach(p => {
+          val str = p.mkString(" ")
+          NgramList = str :: NgramList
+        })
+    }
+    NgramList
+  }
+
 }

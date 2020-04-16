@@ -100,4 +100,9 @@ class FeatureGenerator(filename: String) {
   def candidates = Source.fromFile(filename).getLines
   def features = Source.fromFile(writeFilename).getLines
 
+
+  def generateNgramFeatures(): Unit ={
+//TODO
+  }
+
 }

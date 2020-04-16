@@ -6,13 +6,13 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     // Generate all candidates. Note: this takes quite a while.
-    genAllCandidates(Dataset.TEST)
+//    genAllCandidates(Dataset.TEST)
 //    genAllCandidates(Dataset.VALIDATION)
 //    genAllCandidates(Dataset.TRAINING)
 
     // Compute MPC for the test candidates WITHOUT synthetic candidates. We use this as baseline.
-    val mpc = new MPC("test_candidates_0.txt")
-    mpc.computeMPC()
+//    val mpc = new MPC("test_candidates_0.txt")
+//    mpc.computeMPC()
 
     // This probably takes a bit of time.
 //    genAllFeatures(Dataset.TEST)
@@ -23,9 +23,11 @@ object Main {
 //                                       "validation_candidates_2_features.txt",
 //                                       "no_ngrams_2_synthetic_correct")
 
-    LambdaMart.evaluateModel("./model/no_ngrams_2_synthetic_correct",
-                             "test_candidates_0_features.txt")
+//    LambdaMart.evaluateModel("./model/no_ngrams_2_synthetic_correct",
+//                             "test_candidates_0_features.txt")
 
+    val bgd = new BackgroundData();
+    bgd.getNgramsMap()
   }
 
   def genAllCandidates(file: String): Unit = {
